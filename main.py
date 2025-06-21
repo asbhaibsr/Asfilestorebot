@@ -1,4 +1,5 @@
 from pyrogram import Client, filters
+from pyrogram.handlers import CallbackQueryHandler
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
 import os, asyncio
 from utils.database import get_db
