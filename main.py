@@ -27,7 +27,7 @@ bot.add_handler(filters.command("clearlimit") & filters.user(ADMIN_ID), admin.cl
 bot.add_handler(filters.command("checkutr") & filters.user(ADMIN_ID), utr.check_utr_handler)
 
 bot.add_handler(filters.regex("Send UTR"), utr.utr_handler)
-bot.add_handler(filters.callback_query, utr.handle_callback_buttons)
+bot.add_handler(CallbackQueryHandler(utr.handle_callback_buttons))
 
 print("Bot is running...")
 bot.run()
