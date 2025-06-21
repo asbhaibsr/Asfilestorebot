@@ -1,40 +1,73 @@
 from pyrogram import Client, filters
-from pyrogram.handlers import MessageHandler, CallbackQueryHandler
+from pyrogram.types import Message, CallbackQuery
 from dotenv import load_dotenv
+import os
 from handlers import start, help_cmd, genlink, multigenlink, mystats, stats, admin, utr
 from utils.database import get_db
-import os
 
-# Load config.env file
 load_dotenv("config.env")
 
-# Bot credentials from .env
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 API_ID = int(os.getenv("API_ID"))
 API_HASH = os.getenv("API_HASH")
 ADMIN_ID = int(os.getenv("ADMIN"))
 
-# Initialize bot
 bot = Client("FileStoreBot", bot_token=BOT_TOKEN, api_id=API_ID, api_hash=API_HASH)
 db = get_db()
 
-# Add command handlers
-bot.add_handler(MessageHandler(filters.command("start") & filters.private, start.start_cmd))
-bot.add_handler(MessageHandler(filters.command("help") & filters.private, help_cmd.help_cmd))
-bot.add_handler(MessageHandler(filters.command("genlink") & filters.private, genlink.genlink_handler))
-bot.add_handler(MessageHandler(filters.command("multigenlink") & filters.private, multigenlink.multi_genlink_handler))
-bot.add_handler(MessageHandler(filters.command("mystats") & filters.private, mystats.mystats_handler))
-bot.add_handler(MessageHandler(filters.command("stats") & filters.private, stats.stats_handler))
 
-# Admin-only commands
-bot.add_handler(MessageHandler(filters.command("broadcast") & filters.user(ADMIN_ID), admin.broadcast_handler))
-bot.add_handler(MessageHandler(filters.command("limit") & filters.user(ADMIN_ID), admin.set_limit_handler))
-bot.add_handler(MessageHandler(filters.command("clearlimit") & filters.user(ADMIN_ID), admin.clear_limit_handler))
-bot.add_handler(MessageHandler(filters.command("checkutr") & filters.user(ADMIN_ID), utr.check_utr_handler))
+@bot.on_message(filters.command("start") & filters.private)
+async def start_handler(client, message: Message):
+    await start.start_cmd(client, message)
 
-# UTR flow handlers
-bot.add_handler(MessageHandler(filters.regex("Send UTR"), utr.utr_handler))
-bot.add_handler(CallbackQueryHandler(utr.handle_callback_buttons))
+@bot.on_message(filters.command("help") & filters.private)
+async def help_handler(client, message: Message):
+    await help_cmd.help_cmd(client, message)
+
+@bot.on_message(filters.command("genlink") & filters.private)
+async def genlink_handler(client, message: Message):
+    await genlink.genlink_handler(client, message)
+
+@bot.on_message(filters.command("multigenlink") & filters.private)
+async def multigenlink_handler(client, message: Message):
+    await multigenlink.multi_genlink_handler(client, message)
+
+@bot.on_message(filters.command("mystats") & filters.private)
+async def mystats_handler(client, message: Message):
+    await mystats.mystats_handler(client, message)
+
+@bot.on_message(filters.command("stats") & filters.private)
+async def stats_handler(client, message: Message):
+    await stats.stats_handler(client, message)
+
+
+# Admin-only
+@bot.on_message(filters.command("broadcast") & filters.user(ADMIN_ID))
+async def broadcast_handler(client, message: Message):
+    await admin.broadcast_handler(client, message)
+
+@bot.on_message(filters.command("limit") & filters.user(ADMIN_ID))
+async def set_limit_handler(client, message: Message):
+    await admin.set_limit_handler(client, message)
+
+@bot.on_message(filters.command("clearlimit") & filters.user(ADMIN_ID))
+async def clear_limit_handler(client, message: Message):
+    await admin.clear_limit_handler(client, message)
+
+@bot.on_message(filters.command("checkutr") & filters.user(ADMIN_ID))
+async def checkutr_handler(client, message: Message):
+    await utr.check_utr_handler(client, message)
+
+
+# UTR Handler
+@bot.on_message(filters.regex("Send UTR"))
+async def utr_submit(client, message: Message):
+    await utr.utr_handler(client, message)
+
+@bot.on_callback_query()
+async def callback_buttons(client, callback_query: CallbackQuery):
+    await utr.handle_callback_buttons(client, callback_query)
+
 
 print("🤖 Bot is running...")
 bot.run()
