@@ -15,7 +15,6 @@ ADMIN_ID = int(os.getenv("ADMIN"))
 bot = Client("FileStoreBot", bot_token=BOT_TOKEN, api_id=API_ID, api_hash=API_HASH)
 db = get_db()
 
-
 @bot.on_message(filters.command("start") & filters.private)
 async def start_handler(client, message: Message):
     await start.start_cmd(client, message)
@@ -40,8 +39,6 @@ async def mystats_handler(client, message: Message):
 async def stats_handler(client, message: Message):
     await stats.stats_handler(client, message)
 
-
-# Admin-only
 @bot.on_message(filters.command("broadcast") & filters.user(ADMIN_ID))
 async def broadcast_handler(client, message: Message):
     await admin.broadcast_handler(client, message)
@@ -58,8 +55,6 @@ async def clear_limit_handler(client, message: Message):
 async def checkutr_handler(client, message: Message):
     await utr.check_utr_handler(client, message)
 
-
-# UTR Handler
 @bot.on_message(filters.regex("Send UTR"))
 async def utr_submit(client, message: Message):
     await utr.utr_handler(client, message)
@@ -67,7 +62,6 @@ async def utr_submit(client, message: Message):
 @bot.on_callback_query()
 async def callback_buttons(client, callback_query: CallbackQuery):
     await utr.handle_callback_buttons(client, callback_query)
-
 
 print("🤖 Bot is running...")
 bot.run()
