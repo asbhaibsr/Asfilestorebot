@@ -1,5 +1,5 @@
 from pyrogram.types import Message
-from utils.database import broadcast_all, set_limit, clear_all_limits
+from utils.database import broadcast_all, set_user_limit, clear_user_uploads
 
 async def broadcast_handler(client, message: Message):
     if not message.reply_to_message:
