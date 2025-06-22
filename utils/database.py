@@ -69,7 +69,16 @@ async def confirm_premium(user_id, limit):
     if user_id in utr_store:
         del utr_store[user_id]
 
-# ✅ Missing function that caused error in multigenlink.py
+# ✅ Fix for multigenlink.py
 async def check_multi_limit(user_id):
     user = await db.users.find_one({"_id": user_id}) or {}
     return user.get("multi_upload_count", 0)
+
+# ✅ Fix for stats.py
+async def get_bot_stats():
+    total_users = await db.users.count_documents({})
+    try:
+        total_files = await db.files.count_documents({})
+    except:
+        total_files = 0
+    return total_users, total_files
