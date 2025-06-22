@@ -15,6 +15,7 @@ ADMIN_ID = int(os.getenv("ADMIN"))
 bot = Client("FileStoreBot", bot_token=BOT_TOKEN, api_id=API_ID, api_hash=API_HASH)
 db = get_db()
 
+# Commands
 @bot.on_message(filters.command("start") & filters.private)
 async def start_handler(client, message: Message):
     await start.start_cmd(client, message)
@@ -39,6 +40,7 @@ async def mystats_handler(client, message: Message):
 async def stats_handler(client, message: Message):
     await stats.stats_handler(client, message)
 
+# Admin commands
 @bot.on_message(filters.command("broadcast") & filters.user(ADMIN_ID))
 async def broadcast_handler(client, message: Message):
     await admin.broadcast_handler(client, message)
@@ -55,13 +57,27 @@ async def clear_limit_handler(client, message: Message):
 async def checkutr_handler(client, message: Message):
     await utr.check_utr_handler(client, message)
 
+# UTR Text
 @bot.on_message(filters.regex("Send UTR"))
 async def utr_submit(client, message: Message):
     await utr.utr_handler(client, message)
 
+# Callback buttons (all handled here)
 @bot.on_callback_query()
-async def callback_buttons(client, callback_query: CallbackQuery):
-    await utr.handle_callback_buttons(client, callback_query)
+async def callback_buttons(client: Client, query: CallbackQuery):
+    data = query.data
+
+    # UTR Button flow
+    if data.startswith("buy_") or data in ["sendutr", "approveutr_", "rejectutr_", "give_"]:
+        await utr.handle_callback_buttons(client, query)
+
+    # Multigenlink generate button
+    elif data == "generate_multi":
+        await multigenlink.generate_multi_link(client, query)
+
+    # Unknown button
+    else:
+        await query.answer("Unknown button or not implemented!", show_alert=True)
 
 print("🤖 Bot is running...")
 bot.run()
